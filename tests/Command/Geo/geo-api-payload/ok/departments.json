@@ -1,0 +1,17 @@
+[
+    {
+        "nom": "Department A-1",
+        "code": "D-A-1",
+        "codeRegion": "R-A"
+    },
+    {
+        "nom": "Department B-1",
+        "code": "D-B-1",
+        "codeRegion": "R-B"
+    },
+    {
+        "nom": "Department B-2",
+        "code": "D-B-2",
+        "codeRegion": "R-B"
+    }
+]

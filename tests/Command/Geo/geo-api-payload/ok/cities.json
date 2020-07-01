@@ -1,0 +1,26 @@
+[
+    {
+        "nom": "City A-1-1",
+        "code": "C-A-1-1",
+        "codeDepartement": "D-A-1",
+        "codeRegion": "R-A",
+        "codesPostaux": ["A1001"],
+        "population": 1001
+    },
+    {
+        "nom": "City A-1-2",
+        "code": "C-A-1-2",
+        "codeDepartement": "D-A-1",
+        "codeRegion": "R-A",
+        "codesPostaux": ["A1002"],
+        "population": 1002
+    },
+    {
+        "nom": "City B-2-1",
+        "code": "C-B-2-1",
+        "codeDepartement": "D-B-2",
+        "codeRegion": "R-B",
+        "codesPostaux": ["B2001"],
+        "population": 1001
+    }
+]
