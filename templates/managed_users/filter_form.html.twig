@@ -119,7 +119,7 @@
             <button type="submit" class="btn btn--black b__nudge--bottom-medium">Appliquer</button>
 
             {% if form.vars.submitted %}
-                <a href="{{ path("app_#{space_name}_managed_users_list") }}" class="btn btn--no-border b__nudge--bottom-medium">
+                <a href="{{ get_path(space_name, 'managed_users', 'list', app.request) }}" class="btn btn--no-border b__nudge--bottom-medium">
                     Réinitialiser les filtres
                 </a>
             {% endif %}

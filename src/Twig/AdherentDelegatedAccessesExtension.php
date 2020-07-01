@@ -67,6 +67,7 @@ class AdherentDelegatedAccessesExtension extends AbstractExtension
             DelegatedAccess::ACCESS_CITIZEN_PROJECTS => "app_{$delegatedAccess->getType()}_citizen_projects_delegated_list",
             DelegatedAccess::ACCESS_JECOUTE => "app_jecoute_{$delegatedAccess->getType()}_delegated_list",
             DelegatedAccess::ACCESS_ELECTED_REPRESENTATIVES => "app_{$delegatedAccess->getType()}_elected_representatives_delegated_list",
+            DelegatedAccess::ACCESS_INSTITUTIONAL_EVENTS => "app_{$delegatedAccess->getType()}_institutional_events_delegated_list",
         ];
 
         return $routes[$delegatedAccess->getAccesses()[0]];

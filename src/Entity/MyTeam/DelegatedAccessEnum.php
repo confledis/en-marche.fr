@@ -31,6 +31,7 @@ class DelegatedAccessEnum extends Enum
             $accesses[] = DelegatedAccess::ACCESS_ELECTED_REPRESENTATIVES;
             $accesses[] = DelegatedAccess::ACCESS_INSTITUTIONAL_EVENTS;
             $accesses[] = DelegatedAccess::ACCESS_COMMITTEE;
+            $accesses[] = DelegatedAccess::ACCESS_INSTITUTIONAL_EVENTS;
         }
 
         return $accesses;

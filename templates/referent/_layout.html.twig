@@ -41,9 +41,11 @@
                                 </p>
                             {% endif %}
                         </div>
+                        {% if isReferent %}
                         <p class="report">🐛 Bug ? Nouveau besoin ?
                             <a href="https://t.me/joinchat/EmY0e1J2fyTv4Fd-cHEMHg" target="_blank" class="text--blue--dark link--no-decor">Écrivez-nous !</a>
                         </p>
+                        {% endif %}
                     </div>
                     <div class="second-section">
                         <div>
@@ -169,7 +171,13 @@
 
                             {% if isReferent %}
                                 <li class="{{ is_active_route(app.request, 'app_referent_institutional_events*') ? 'active' }}">
-                                    <a href="{{ path('app_referent_institutional_events') }}">Mes réunions privées</a>
+                                    <a href="{{ path('app_referent_institutional_events_list') }}">Mes réunions privées</a>
+                                </li>
+                            {% endif %}
+
+                            {% if is_canary_enabled() and is_granted('HAS_DELEGATED_ACCESS_INSTITUTIONAL_EVENTS', app.request) %}
+                                <li class="{{ is_active_route(app.request, 'app_referent_institutional_events_delegated*') ? 'active' }}">
+                                    <a href="{{ path('app_referent_institutional_events_delegated_list', {delegated_access_uuid: delegated_access_uuid}) }}">Mes réunions privées</a>
                                 </li>
                             {% endif %}
 
