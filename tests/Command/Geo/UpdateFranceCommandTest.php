@@ -28,14 +28,34 @@ final class UpdateFranceCommandTest extends WebTestCase
         /* @var UpdateFranceCommand $command */
         $command = $application->find('app:geo:update-france');
 
-        // Inject mock client
+        // Data (Mock)
+
+        $regions = json_encode([
+            ['nom' => 'Region A', 'code' => 'R-A'],
+            ['nom' => 'Region B', 'code' => 'R-B'],
+        ], \JSON_THROW_ON_ERROR);
+
+        $departments = json_encode([
+            ['nom' => 'Department A-1', 'code' => 'D-A-1', 'codeRegion' => 'R-A'],
+            ['nom' => 'Department B-1', 'code' => 'D-B-1', 'codeRegion' => 'R-B'],
+            ['nom' => 'Department B-2', 'code' => 'D-B-2', 'codeRegion' => 'R-B'],
+        ], \JSON_THROW_ON_ERROR);
+
+        $cities = json_encode([
+            ['nom' => 'City A-1-1', 'code' => 'C-A-1-1', 'codeDepartement' => 'D-A-1'],
+            ['nom' => 'City A-1-2', 'code' => 'C-A-1-2', 'codeDepartement' => 'D-A-1'],
+            ['nom' => 'City B-2-1', 'code' => 'C-B-2-1', 'codeDepartement' => 'D-B-2'],
+        ], \JSON_THROW_ON_ERROR);
+
+        // HTTP Client (Mock)
+
         $reflection = new \ReflectionClass(\get_class($command));
         $property = $reflection->getProperty('geoGouvApiClient');
         $property->setAccessible(true);
         $property->setValue($command, new MockHttpClient([
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/ok/regions.json')),
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/ok/departments.json')),
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/ok/cities.json')),
+            new MockResponse($regions),
+            new MockResponse($departments),
+            new MockResponse($cities),
         ], 'http://null'));
 
         $commandTester = new CommandTester($command);
@@ -72,14 +92,34 @@ final class UpdateFranceCommandTest extends WebTestCase
         /* @var UpdateFranceCommand $command */
         $command = $application->find('app:geo:update-france');
 
-        // Inject mock client
+        // Data (Mock)
+
+        $regions = json_encode([
+            ['nom' => 'Region A', 'code' => 'R-A'],
+            ['nom' => 'Region B', 'code' => 'R-B'],
+        ], \JSON_THROW_ON_ERROR);
+
+        $departments = json_encode([
+            ['nom' => 'Department A-1', 'code' => 'D-A-1', 'codeRegion' => 'R-A'],
+            ['nom' => 'Department B-1', 'code' => 'D-B-1', 'codeRegion' => 'R-B'],
+            ['nom' => 'Department B-2', 'code' => 'D-B-2', 'codeRegion' => 'R-B'],
+        ], \JSON_THROW_ON_ERROR);
+
+        $cities = json_encode([
+            ['nom' => 'City A-1-1', 'code' => 'C-A-1-1', 'codeDepartement' => 'D-A-1'],
+            ['nom' => 'City A-1-2', 'code' => 'C-A-1-2', 'codeDepartement' => 'D-A-1'],
+            ['nom' => 'City B-2-1', 'code' => 'C-B-2-1', 'codeDepartement' => 'D-B-2'],
+        ], \JSON_THROW_ON_ERROR);
+
+        // HTTP Client (Mock)
+
         $reflection = new \ReflectionClass(\get_class($command));
         $property = $reflection->getProperty('geoGouvApiClient');
         $property->setAccessible(true);
         $property->setValue($command, new MockHttpClient([
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/ok/regions.json')),
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/ok/departments.json')),
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/ok/cities.json')),
+            new MockResponse($regions),
+            new MockResponse($departments),
+            new MockResponse($cities),
         ], 'http://null'));
 
         $commandTester = new CommandTester($command);
@@ -113,13 +153,24 @@ final class UpdateFranceCommandTest extends WebTestCase
         /* @var UpdateFranceCommand $command */
         $command = $application->find('app:geo:update-france');
 
-        // Inject mock client
+        // Data (Mock)
+
+        $regions = json_encode([
+            ['nom' => 'Region A', 'code' => 'R-A'],
+        ], \JSON_THROW_ON_ERROR);
+
+        $departments = json_encode([
+            ['nom' => 'Department X-1', 'code' => 'D-X-1', 'codeRegion' => 'R-X'],
+        ], \JSON_THROW_ON_ERROR);
+
+        // HTTP Client (Mock)
+
         $reflection = new \ReflectionClass(\get_class($command));
         $property = $reflection->getProperty('geoGouvApiClient');
         $property->setAccessible(true);
         $property->setValue($command, new MockHttpClient([
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/broken/regions.json')),
-            new MockResponse(file_get_contents(__DIR__.'/geo-api-payload/broken/departments.json')),
+            new MockResponse($regions),
+            new MockResponse($departments),
             new MockResponse('[]'),
         ], 'http://null'));
 
