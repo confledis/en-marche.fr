@@ -8,13 +8,28 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="geo_city")
+ * @ORM\HasLifecycleCallbacks
  *
  * @Algolia\Index(autoIndex=false)
  */
 class City
 {
     use GeoTrait;
-    use UnderDepartmentTrait;
+
+    /**
+     * @var int|null
+     *
+     * @ORM\Column(type="integer")
+     */
+    private $population;
+
+    /**
+     * @var Department|null
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Geo\Department")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $department;
 
     /**
      * @var Canton|null
@@ -40,10 +55,29 @@ class City
      */
     private $district;
 
-    public function __construct(string $code, string $name, Department $department)
+    public function __construct(string $code, string $name)
     {
         $this->code = $code;
         $this->name = $name;
+    }
+
+    public function getPopulation(): ?int
+    {
+        return $this->population;
+    }
+
+    public function setPopulation(?int $population): void
+    {
+        $this->population = $population;
+    }
+
+    public function getDepartment(): ?Department
+    {
+        return $this->department;
+    }
+
+    public function setDepartment(?Department $department): void
+    {
         $this->department = $department;
     }
 

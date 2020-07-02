@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="geo_region")
+ * @ORM\HasLifecycleCallbacks
  *
  * @Algolia\Index(autoIndex=false)
  */

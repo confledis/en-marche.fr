@@ -29,6 +29,20 @@ trait GeoTrait
      */
     private $name;
 
+    /**
+     * @var \DateTimeImmutable
+     *
+     * @ORM\Column(type="datetime_immutable")
+     */
+    public $createdAt = null;
+
+    /**
+     * @var \DateTimeImmutable
+     *
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    public $updatedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,5 +66,23 @@ trait GeoTrait
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function fillCreatedAt(): void
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function fillUpdatedAt(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }
