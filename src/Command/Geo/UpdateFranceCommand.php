@@ -19,17 +19,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class UpdateFranceCommand extends Command
 {
     private const FRANCE_CODE = 'FR';
-
-    private const REGIONS_PATH = '/regions';
-    private const DEPARTMENTS_PATH = '/departements';
-    private const CITIES_PATH = '/communes';
+    private const API_PATH = '/communes?fields=code,nom,population,departement,region';
 
     protected static $defaultName = 'app:geo:update-france';
 
     /**
      * @var HttpClientInterface
      */
-    private $geoGouvApiClient;
+    private $apiClient;
 
     /**
      * @var EntityManagerInterface
@@ -44,11 +41,11 @@ final class UpdateFranceCommand extends Command
     /**
      * @var Collection
      */
-    private $entityCache;
+    private $entities;
 
     public function __construct(HttpClientInterface $geoGouvApiClient, EntityManagerInterface $em)
     {
-        $this->geoGouvApiClient = $geoGouvApiClient;
+        $this->apiClient = $geoGouvApiClient;
         $this->em = $em;
 
         parent::__construct();
@@ -65,96 +62,118 @@ final class UpdateFranceCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
-        $this->entityCache = new ArrayCollection();
+        $this->entities = new ArrayCollection();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->io->title('Start updating french administrative division');
 
-        $this->executeCounty();
-        $this->executeRegions();
-        $this->executeDepartments();
-        $this->executeCities();
+        //
+        // Processing data
+        //
+
+        $this->io->section('Requesting API');
+
+        $entries = $this->apiClient->request('GET', self::API_PATH)->toArray();
+
+        $this->io->success(sprintf('%d cities found', \count($entries)));
+
+        $this->io->section('Processing entries');
+
+        $this->io->progressStart(\count($entries));
+        foreach ($entries as $entry) {
+            $this->processEntry($entry);
+            $this->io->progressAdvance();
+        }
+        $this->io->progressFinish();
+
+        $this->io->success('Done');
+
+        //
+        // Summary
+        //
+
+        $this->summary();
+
+        //
+        // Writing
+        //
 
         $this->io->section('Persisting in database');
 
         $dryRun = $input->getOption('dry-run');
         if ($dryRun) {
             $this->io->comment('Nothing was persisted in database');
-        } else {
-            foreach ($this->entityCache as $entities) {
-                $this->em->persist($entities);
-            }
-            $this->em->flush();
+
+            return 0;
         }
+
+        foreach ($this->entities as $entity) {
+            $this->em->persist($entity);
+        }
+        $this->em->flush();
 
         $this->io->success('Done');
 
         return 0;
     }
 
-    private function executeCounty(): void
+    private function processEntry(array $entry): void
     {
-        $this->io->section('Country');
-
-        $this->retrieveEntity(Country::class, self::FRANCE_CODE, static function () {
+        $france = $this->retrieveEntity(Country::class, self::FRANCE_CODE, static function () {
             return new Country(self::FRANCE_CODE, 'France');
         });
-    }
 
-    private function executeRegions(): void
-    {
-        $this->io->section('Regions');
-
-        $france = $this->retrieveEntity(Country::class, self::FRANCE_CODE);
-
-        $itemsRaw = $this->geoGouvApiClient->request('GET', self::REGIONS_PATH)->toArray();
-        foreach ($itemsRaw as $raw) {
-            $this->retrieveEntity(
+        /* @var Region|null $region */
+        $region = null;
+        if (isset($entry['region']['code'])) {
+            $region = $this->retrieveEntity(
                 Region::class,
-                $raw['code'],
-                static function () use ($raw, $france): Region {
-                    return new Region($raw['code'], $raw['nom'], $france);
+                $entry['region']['code'],
+                static function () use ($entry, $france): Region {
+                    return new Region(
+                        $entry['region']['code'],
+                        $entry['region']['nom'],
+                        $france
+                    );
                 }
             );
+
+            $region->setName($entry['region']['nom']);
         }
-    }
 
-    private function executeDepartments(): void
-    {
-        $this->io->section('Departments');
-
-        $itemsRaw = $this->geoGouvApiClient->request('GET', self::DEPARTMENTS_PATH)->toArray();
-        foreach ($itemsRaw as $raw) {
-            $this->retrieveEntity(
+        /* @var Department|null $department */
+        $department = null;
+        if ($region && isset($entry['departement']['code'])) {
+            $department = $this->retrieveEntity(
                 Department::class,
-                $raw['code'],
-                function () use ($raw): Department {
-                    $region = $this->retrieveEntity(Region::class, $raw['codeRegion']);
-
-                    return new Department($raw['code'], $raw['nom'], $region);
+                $entry['departement']['code'],
+                static function () use ($entry, $region): Department {
+                    return new Department(
+                        $entry['departement']['code'],
+                        $entry['departement']['nom'],
+                        $region
+                    );
                 }
             );
+
+            $department->setName($entry['departement']['nom']);
+            $department->setRegion($region);
         }
-    }
 
-    private function executeCities(): void
-    {
-        $this->io->section('Cities');
+        /* @var City $city */
+        $city = $this->retrieveEntity(
+            City::class,
+            $entry['code'],
+            static function () use ($entry): City {
+                return new City($entry['code'], $entry['nom']);
+            }
+        );
 
-        $itemsRaw = $this->geoGouvApiClient->request('GET', self::CITIES_PATH)->toArray();
-        foreach ($itemsRaw as $raw) {
-            $this->retrieveEntity(
-                City::class,
-                $raw['code'],
-                function () use ($raw): City {
-                    $department = $this->retrieveEntity(Department::class, $raw['codeDepartement']);
-
-                    return new City($raw['code'], $raw['nom'], $department);
-                }
-            );
-        }
+        $city->setName($entry['nom']);
+        $city->setPopulation($entry['population'] ?? null);
+        $city->setDepartment($department);
     }
 
     /**
@@ -166,7 +185,7 @@ final class UpdateFranceCommand extends Command
     {
         $key = $class.'#'.$code;
 
-        if (!$this->entityCache->containsKey($key)) {
+        if (!$this->entities->containsKey($key)) {
             $repository = $this->em->getRepository($class);
 
             /* @var Country|Region|Department|City $entity */
@@ -176,13 +195,53 @@ final class UpdateFranceCommand extends Command
                     throw new \RuntimeException(sprintf('Entity %s not found', $key));
                 }
 
-                $this->io->writeln(sprintf('Creating %s', $key));
                 $entity = $factory();
             }
 
-            $this->entityCache->set($key, $entity);
+            $this->entities->set($key, $entity);
         }
 
-        return $this->entityCache->get($key);
+        return $this->entities->get($key);
+    }
+
+    private function summary(): void
+    {
+        $this->io->section('Summary');
+
+        /* @var Collection|Region[] $newRegions */
+        $newRegions = $this->entities->filter(static function ($entity) {
+            return $entity instanceof Region && !$entity->getCreatedAt();
+        });
+
+        $this->io->note(sprintf('%d new regions', $newRegions->count()));
+        if ($this->io->isVerbose()) {
+            foreach ($newRegions as $region) {
+                $this->io->text(sprintf('%s (%s)', $region->getName(), $region->getCode()));
+            }
+        }
+
+        /* @var Collection|Department[] $newDepartments */
+        $newDepartments = $this->entities->filter(static function ($entity) {
+            return $entity instanceof Department && !$entity->getCreatedAt();
+        });
+
+        $this->io->note(sprintf('%d new departments', $newDepartments->count()));
+        if ($this->io->isVerbose()) {
+            foreach ($newDepartments as $department) {
+                $this->io->text(sprintf('%s (%s)', $department->getName(), $department->getCode()));
+            }
+        }
+
+        /* @var Collection|City[] $newCities */
+        $newCities = $this->entities->filter(static function ($entity) {
+            return $entity instanceof City && !$entity->getCreatedAt();
+        });
+
+        $this->io->note(sprintf('%d new cities', $newCities->count()));
+        if ($this->io->isVerbose()) {
+            foreach ($newCities as $city) {
+                $this->io->text(sprintf('%s (%s)', $city->getName(), $city->getCode()));
+            }
+        }
     }
 }
