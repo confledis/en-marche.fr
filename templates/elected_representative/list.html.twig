@@ -87,7 +87,7 @@
                         <button type="submit" class="btn btn--black b__nudge--bottom-medium">Appliquer</button>
 
                         {% if form.vars.submitted %}
-                            <a href="{{ get_path('referent', 'elected_representatives', 'list', app.request) }}" class="btn btn--no-border b__nudge--bottom-medium">
+                            <a href="{{ path("app_#{space_name}_elected_representatives_list") }}" class="btn btn--no-border b__nudge--bottom-medium">
                                 Réinitialiser les filtres
                             </a>
                         {% endif %}
@@ -182,7 +182,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ get_path('referent', 'elected_representatives', 'show', app.request, { uuid: elected_representative.uuid }) }}" class="text--blue--dark link--no-decor">Afficher</a>
+                                        <a href="{{ path("app_#{space_name}_elected_representatives_show", { uuid: elected_representative.uuid }) }}" class="text--blue--dark link--no-decor">Afficher</a>
                                     </td>
                                 </tr>
                             {% else %}
