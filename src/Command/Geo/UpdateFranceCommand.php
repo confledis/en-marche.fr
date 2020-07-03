@@ -19,7 +19,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class UpdateFranceCommand extends Command
 {
     private const FRANCE_CODE = 'FR';
-    private const API_PATH = '/communes?fields=code,nom,population,departement,region';
+    private const API_PATH = '/communes?fields=code,nom,codesPostaux,population,departement,region';
 
     protected static $defaultName = 'app:geo:update-france';
 
@@ -172,6 +172,7 @@ final class UpdateFranceCommand extends Command
         );
 
         $city->setName($entry['nom']);
+        $city->setPostalCode($entry['codesPostaux'] ?? []);
         $city->setPopulation($entry['population'] ?? null);
         $city->setDepartment($department);
     }
