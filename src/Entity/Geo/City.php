@@ -17,6 +17,13 @@ class City
     use GeoTrait;
 
     /**
+     * @var string[]|null
+     *
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $postalCode;
+
+    /**
      * @var int|null
      *
      * @ORM\Column(type="integer", nullable=true)
@@ -59,6 +66,22 @@ class City
     {
         $this->code = $code;
         $this->name = $name;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPostalCode(): array
+    {
+        return $this->postalCode ?: [];
+    }
+
+    /**
+     * @param string[] $postalCode
+     */
+    public function setPostalCode(array $postalCode): void
+    {
+        $this->postalCode = $postalCode;
     }
 
     public function getPopulation(): ?int

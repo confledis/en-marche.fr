@@ -5,7 +5,7 @@ namespace Migrations;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 
-final class Version20200702213354 extends AbstractMigration
+final class Version20200703155606 extends AbstractMigration
 {
     public function up(Schema $schema): void
     {
@@ -59,6 +59,7 @@ final class Version20200702213354 extends AbstractMigration
           canton_id INT UNSIGNED DEFAULT NULL,
           city_community_id INT UNSIGNED DEFAULT NULL,
           district_id INT UNSIGNED DEFAULT NULL,
+          postal_code JSON DEFAULT NULL,
           population INT DEFAULT NULL,
           code VARCHAR(255) NOT NULL,
           name VARCHAR(255) NOT NULL,
